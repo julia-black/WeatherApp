@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:weather_app/api.dart';
@@ -27,8 +28,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  City _city = City('Malaga', 0);
-  Future<WeatherResponse> _futureWeather;
+  City city = City('Malaga', 0);
+  Future<WeatherResponse> futureWeather;
+  Language language;
 
   final mainColor = Color(0xFF2561A0);
   final additionalColor = Colors.white70;
@@ -40,19 +42,31 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _futureWeather = UseCase().loadWeather(_city.name);
+    language = Language.en;
+    futureWeather = UseCase().loadWeather(city.name, language);
   }
 
-  void _updateWeather() {
+  void updateWeather() {
     setState(() {
-      _futureWeather = UseCase().loadWeather(_city.name);
+      futureWeather = UseCase().loadWeather(city.name, language);
+    });
+  }
+
+  void changeLanguage() {
+    setState(() {
+      if (language == Language.en) {
+        language = Language.es;
+      } else {
+        language = Language.en;
+      }
+      futureWeather = UseCase().loadWeather(city.name, language);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called
-    _updateWeather();
+    // updateWeather();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -66,22 +80,34 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 Row(
                   children: [
-                    Container(
-                        padding: defaultPadding,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              color: additionalColor,
-                            ),
-                            Padding(
-                                padding: smallPadding,
-                                child: Text(
-                                  '${_city.name}',
-                                  style: textStyleSmall,
-                                ))
-                          ],
-                        ))
+                    Expanded(
+                        child: Container(
+                            padding: defaultPadding,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  color: additionalColor,
+                                ),
+                                Padding(
+                                    padding: smallPadding,
+                                    child: Text(
+                                      '${city.name}',
+                                      style: textStyleSmall,
+                                    )),
+                                Expanded(
+                                    child: Container(
+                                        alignment: Alignment.centerRight,
+                                        child: GestureDetector(
+                                            onTap: changeLanguage,
+                                            child: Image(
+                                                image: AssetImage(
+                                                    'assets/resources/' +
+                                                        LanguageName[language] +
+                                                        '.png'),
+                                                height: 20))))
+                              ],
+                            )))
                   ],
                 ),
                 Expanded(
@@ -91,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: <Widget>[getWeatherInfo()]))),
               ])),
       floatingActionButton: FloatingActionButton(
-        onPressed: _updateWeather,
+        onPressed: updateWeather,
         tooltip: 'Update',
         child: Icon(Icons.sync),
       ),
@@ -100,15 +126,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   getWeatherInfo() {
     return FutureBuilder<WeatherResponse>(
-      future: _futureWeather,
+      future: futureWeather,
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data.current.temp != null) {
+        if (snapshot.connectionState != ConnectionState.waiting &&
+            snapshot.hasData &&
+            snapshot.data.current.temp != null) {
           return Column(children: <Widget>[
             Padding(
                 padding: defaultPadding,
                 child: SvgPicture.asset(
                     'assets/resources/${getWeatherImage(snapshot.data.current.condition)}',
-                    height: 60.0)),
+                    height: 90.0)),
             Text(
               '+${snapshot.data.current.temp.toInt()}°C',
               style: textStyleLarge,
@@ -119,7 +147,9 @@ class _MyHomePageState extends State<MyHomePage> {
             )
           ]);
         } else if (snapshot.hasError) {
-          return Text('${snapshot.error}');
+          return Padding(
+              padding: defaultPadding,
+              child: Text('${snapshot.error}', style: textStyleSmall));
         }
         return CircularProgressIndicator();
       },
@@ -136,6 +166,8 @@ class _MyHomePageState extends State<MyHomePage> {
       return 'fog.svg';
     } else if (text.contains('sun')) {
       return 'sun.svg';
+    } else if (text.contains('partly cloudy')) {
+      return 'cloudy_sunny.svg';
     } else if (text.contains('cloud')) {
       return 'cloud.svg';
     } else {

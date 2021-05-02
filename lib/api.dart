@@ -7,9 +7,15 @@ class UseCase {
   final String api = "api.weatherapi.com";
   final String apiKey = "4828205ef3e64ffdaae144947212404";
 
-  Future<WeatherResponse> loadWeather(String cityName) async {
-    var queryParameters = {'key': apiKey, 'q': cityName, 'aqu': 'no'};
-    Uri uri = Uri.http(api, 'v1/current.json', queryParameters);
+  Future<WeatherResponse> loadWeather(
+      String cityName, Language language) async {
+    var queryParameters = {
+      'key': apiKey,
+      'q': cityName,
+      'aqu': 'no',
+      'lang': LanguageName[language]
+    };
+    Uri uri = Uri.https(api, 'v1/current.json', queryParameters);
     final response = await http.get(uri);
 
     print("request = ${uri.toString()}");
@@ -62,3 +68,10 @@ class City {
 
   City(this.name, this.id);
 }
+
+enum Language { en, es }
+
+const Map<Language, String> LanguageName = {
+  Language.en: "en",
+  Language.es: "es"
+};
