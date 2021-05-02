@@ -157,19 +157,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String getWeatherImage(Condition condition) {
-    var text = condition.text.toLowerCase();
-    if (text.contains('snow')) {
-      return 'snowy.svg';
-    } else if (text.contains('rain')) {
-      return 'rainy.svg';
-    } else if (text.contains('fog')) {
-      return 'fog.svg';
-    } else if (text.contains('sun')) {
+    var code = condition.code;
+    if (code == 1000) {
       return 'sun.svg';
-    } else if (text.contains('partly cloudy')) {
+    } else if (code == 1003) {
       return 'cloudy_sunny.svg';
-    } else if (text.contains('cloud')) {
+    } else if (code == 1006) {
       return 'cloud.svg';
+    } else if (code == 1009) {
+      return 'cloud.svg';
+    } else if (code == 1030) {
+      return 'fog.svg';
+    } else if (code == 1063 || code >= 1180 && code <= 1201) {
+      return 'rainy.svg';
+    } else if (code == 1066 ||
+        code == 1069 ||
+        code == 1114 ||
+        code == 1117 ||
+        code >= 1204 && code <= 1237) {
+      return 'snowy.svg';
     } else {
       return 'cloudy_sunny.svg';
     }
