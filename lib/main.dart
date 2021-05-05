@@ -105,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     'assets/resources/' +
                                                         LanguageName[language] +
                                                         '.png'),
-                                                height: 20))))
+                                                height: 32))))
                               ],
                             )))
                   ],
