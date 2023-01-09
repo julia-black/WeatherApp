@@ -1,3 +1,3 @@
-# weather_app
+# Weather App
 
-Weather Flutter App
+Simple Weather app on Flutter and Dart.
